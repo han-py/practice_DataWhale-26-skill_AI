@@ -821,6 +821,11 @@ description 里写着"技术方案多源对比分析"，但 Skill 没有任何�
 
 </details>
 
+<details>
+<summary>10</summary>
+
+</details>
+
 </details>
 
 <details>
@@ -1023,6 +1028,16 @@ description 里写着"技术方案多源对比分析"，但 Skill 没有任何�
 <summary>09</summary>
 
 </details>
+
+<details>
+<summary>10</summary>
+
+</details>
+
+</details>
+
+<details>
+<summary>04-医疗健康智能理解与辅助决策Skill开发挑战赛</summary>
 
 </details>
 
