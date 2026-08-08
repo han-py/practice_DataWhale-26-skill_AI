@@ -264,13 +264,18 @@ def draw_background(frame_time):
     global camera_x, camera_y, camera_zoom
 
     canvas.create_rectangle(0, 0, WIDTH, HEIGHT, fill="#040615", outline="")
+
     for y in range(0, HEIGHT, 18):
         ratio = y / max(1, HEIGHT)
-        r = int(10 + 22 * ratio)
-        g = int(12 + 18 * ratio)
-        b = int(34 + 36 * ratio)
+        r = int(6 + 20 * ratio)
+        g = int(10 + 16 * ratio)
+        b = int(24 + 30 * ratio)
         color = f"#{r:02x}{g:02x}{b:02x}"
         canvas.create_rectangle(0, y, WIDTH, y + 18, fill=color, outline="")
+
+    canvas.create_rectangle(0, 0, WIDTH, HEIGHT * 0.58, fill="#07111f", outline="")
+    canvas.create_rectangle(0, HEIGHT * 0.58, WIDTH, HEIGHT * 0.78, fill="#0b1730", outline="")
+    canvas.create_rectangle(0, HEIGHT * 0.78, WIDTH, HEIGHT, fill="#0f223d", outline="")
 
     for x, y, size, alpha, phase in stars:
         twinkle = 0.65 + 0.35 * math.sin(frame_time * 1.3 + phase)
@@ -302,9 +307,11 @@ def draw_background(frame_time):
         scale = cloud["size"]
         ox = (cx - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
         oy = (cy - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
-        canvas.create_oval(ox, oy, ox + 110 * scale, oy + 60 * scale, fill="#ffffff", outline="", stipple="gray50")
-        canvas.create_oval(ox + 32 * scale, oy - 6 * scale, ox + 128 * scale, oy + 46 * scale, fill="#ffffff", outline="", stipple="gray50")
-        canvas.create_oval(ox + 58 * scale, oy + 6 * scale, ox + 142 * scale, oy + 54 * scale, fill="#ffffff", outline="", stipple="gray50")
+        canvas.create_oval(ox, oy, ox + 110 * scale, oy + 60 * scale, fill="#f8fbff", outline="", stipple="gray50")
+        canvas.create_oval(ox + 32 * scale, oy - 6 * scale, ox + 128 * scale, oy + 46 * scale, fill="#f8fbff", outline="", stipple="gray50")
+        canvas.create_oval(ox + 58 * scale, oy + 6 * scale, ox + 142 * scale, oy + 54 * scale, fill="#f8fbff", outline="", stipple="gray50")
+        canvas.create_line(ox + 24 * scale, oy + 30 * scale, ox + 86 * scale, oy + 14 * scale, fill="#dcecff", width=2, stipple="gray25")
+        canvas.create_line(ox + 70 * scale, oy + 18 * scale, ox + 128 * scale, oy + 28 * scale, fill="#dcecff", width=2, stipple="gray25")
 
     for aurora in auroras:
         aurora["x"] += 0.5
@@ -360,38 +367,37 @@ def draw_background(frame_time):
     canvas.create_rectangle(0, HEIGHT * 0.78, WIDTH, HEIGHT, fill="#08101f", outline="")
 
     left_x = WIDTH * 0.06
-    left_y = HEIGHT * 0.82
     canvas.create_polygon(
         left_x, HEIGHT,
-        left_x + 40, HEIGHT * 0.76,
-        left_x + 75, HEIGHT * 0.72,
-        left_x + 110, HEIGHT * 0.78,
-        left_x + 95, HEIGHT,
-        fill="#0c2138", outline=""
+        left_x + 30, HEIGHT * 0.78,
+        left_x + 68, HEIGHT * 0.72,
+        left_x + 102, HEIGHT * 0.76,
+        left_x + 88, HEIGHT,
+        fill="#0b2138", outline=""
     )
-    canvas.create_line(left_x + 28, HEIGHT * 0.83, left_x + 28, HEIGHT, fill="#1f5d7a", width=4)
-    canvas.create_line(left_x + 52, HEIGHT * 0.79, left_x + 52, HEIGHT, fill="#1f5d7a", width=4)
-    canvas.create_line(left_x + 76, HEIGHT * 0.74, left_x + 76, HEIGHT, fill="#1f5d7a", width=4)
+    canvas.create_line(left_x + 24, HEIGHT * 0.82, left_x + 24, HEIGHT, fill="#1d5c77", width=4)
+    canvas.create_line(left_x + 46, HEIGHT * 0.77, left_x + 46, HEIGHT, fill="#1d5c77", width=4)
+    canvas.create_line(left_x + 70, HEIGHT * 0.73, left_x + 70, HEIGHT, fill="#1d5c77", width=4)
+    canvas.create_oval(left_x + 18, HEIGHT * 0.78, left_x + 40, HEIGHT * 0.83, fill="#f7e3a5", outline="")
+    canvas.create_line(left_x + 20, HEIGHT * 0.80, left_x + 38, HEIGHT * 0.80, fill="#fff2b2", width=2)
 
     right_x = WIDTH * 0.94
-    right_y = HEIGHT * 0.82
     canvas.create_polygon(
         right_x, HEIGHT,
-        right_x - 40, HEIGHT * 0.76,
-        right_x - 75, HEIGHT * 0.72,
-        right_x - 110, HEIGHT * 0.78,
-        right_x - 95, HEIGHT,
-        fill="#0c2138", outline=""
+        right_x - 30, HEIGHT * 0.78,
+        right_x - 68, HEIGHT * 0.72,
+        right_x - 102, HEIGHT * 0.76,
+        right_x - 88, HEIGHT,
+        fill="#0b2138", outline=""
     )
-    canvas.create_line(right_x - 28, HEIGHT * 0.83, right_x - 28, HEIGHT, fill="#1f5d7a", width=4)
-    canvas.create_line(right_x - 52, HEIGHT * 0.79, right_x - 52, HEIGHT, fill="#1f5d7a", width=4)
-    canvas.create_line(right_x - 76, HEIGHT * 0.74, right_x - 76, HEIGHT, fill="#1f5d7a", width=4)
+    canvas.create_line(right_x - 24, HEIGHT * 0.82, right_x - 24, HEIGHT, fill="#1d5c77", width=4)
+    canvas.create_line(right_x - 46, HEIGHT * 0.77, right_x - 46, HEIGHT, fill="#1d5c77", width=4)
+    canvas.create_line(right_x - 70, HEIGHT * 0.73, right_x - 70, HEIGHT, fill="#1d5c77", width=4)
+    canvas.create_oval(right_x - 40, HEIGHT * 0.78, right_x - 18, HEIGHT * 0.83, fill="#f7e3a5", outline="")
+    canvas.create_line(right_x - 38, HEIGHT * 0.80, right_x - 20, HEIGHT * 0.80, fill="#fff2b2", width=2)
 
-    canvas.create_oval(WIDTH * 0.12, HEIGHT * 0.83, WIDTH * 0.16, HEIGHT * 0.87, fill="#f7e3a5", outline="")
-    canvas.create_oval(WIDTH * 0.84, HEIGHT * 0.83, WIDTH * 0.88, HEIGHT * 0.87, fill="#f7e3a5", outline="")
-
-    canvas.create_line(WIDTH * 0.12, HEIGHT * 0.85, WIDTH * 0.16, HEIGHT * 0.85, fill="#fff2b2", width=2)
-    canvas.create_line(WIDTH * 0.84, HEIGHT * 0.85, WIDTH * 0.88, HEIGHT * 0.85, fill="#fff2b2", width=2)
+    canvas.create_line(WIDTH * 0.22, HEIGHT * 0.82, WIDTH * 0.30, HEIGHT * 0.74, fill="#8dd5ff", width=3, stipple="gray25")
+    canvas.create_line(WIDTH * 0.78, HEIGHT * 0.82, WIDTH * 0.70, HEIGHT * 0.74, fill="#8dd5ff", width=3, stipple="gray25")
 
 
 def update_fireworks():
