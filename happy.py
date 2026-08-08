@@ -136,6 +136,9 @@ def create_clouds(width, height):
             "y": random.randint(60, int(height * 0.3)),
             "size": random.uniform(0.9, 1.6),
             "speed": random.uniform(0.18, 0.5),
+            "bounce": 0.0,
+            "bounce_dir": 1.0,
+            "bounce_timer": 0.0,
         })
 
 
@@ -283,8 +286,19 @@ def draw_background(frame_time):
         if cloud["x"] > WIDTH + 160:
             cloud["x"] = -180
             cloud["y"] = random.randint(50, int(HEIGHT * 0.3))
+        if cloud["bounce_timer"] > 0:
+            cloud["bounce_timer"] -= 0.016
+            cloud["bounce"] += cloud["bounce_dir"] * 3.5
+            if cloud["bounce"] > 8:
+                cloud["bounce_dir"] = -1.0
+            elif cloud["bounce"] < 0:
+                cloud["bounce"] = 0.0
+                cloud["bounce_dir"] = 1.0
+                cloud["bounce_timer"] = 0.0
+        else:
+            cloud["bounce"] = max(0.0, cloud["bounce"] * 0.8)
         cx = cloud["x"]
-        cy = cloud["y"]
+        cy = cloud["y"] - cloud["bounce"]
         scale = cloud["size"]
         ox = (cx - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
         oy = (cy - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
@@ -320,6 +334,11 @@ def draw_background(frame_time):
     canvas.create_oval(moon_x - 90, moon_y - 90, moon_x + 90, moon_y + 90, fill="#f7e3a5", outline="")
     canvas.create_oval(moon_x - 60, moon_y - 60, moon_x + 60, moon_y + 60, fill="#040615", outline="")
     canvas.create_oval(moon_x - 100, moon_y - 100, moon_x + 100, moon_y + 100, outline="#fff2b2", width=2)
+
+    mist_x = WIDTH * 0.72 + math.sin(frame_time * 0.35) * 40
+    mist_y = HEIGHT * 0.22 + math.cos(frame_time * 0.28) * 24
+    canvas.create_oval(mist_x - 180, mist_y - 70, mist_x + 180, mist_y + 70, fill="#6fe7ff", outline="", stipple="gray25")
+    canvas.create_oval(mist_x - 140, mist_y - 40, mist_x + 140, mist_y + 40, fill="#ffffff", outline="", stipple="gray12")
 
     for i in range(4):
         y_top = HEIGHT * 0.68 + i * 20 + math.sin(frame_time * 0.4 + i) * 8
@@ -435,7 +454,7 @@ def draw_title(frame_time):
         subtitle_timer = 0.0
         subtitle_index = (subtitle_index + 1) % len(subtitles)
 
-    y = HEIGHT * 0.72 + math.sin(frame_time * 1.8) * 10
+    y = HEIGHT * 0.68 + math.sin(frame_time * 1.8) * 8
     scale = 1.0 + 0.05 * math.sin(frame_time * 2.6)
     size = int(96 + 20 * scale + 30 * ease)
 
@@ -493,6 +512,18 @@ def on_click(event):
         pass
 
 
+def play_special_effect(kind):
+    try:
+        import winsound
+        if kind == "cloud":
+            winsound.Beep(1800, 45)
+            winsound.Beep(2400, 25)
+        else:
+            winsound.Beep(1700, 60)
+    except Exception:
+        pass
+
+
 def on_canvas_click(event):
     x, y = event.x, event.y
     if 0 <= x <= WIDTH and 0 <= y <= HEIGHT:
@@ -514,6 +545,11 @@ def on_canvas_click(event):
             spawn_click_burst(x, y, "cloud")
             cloud["x"] = random.randint(0, int(WIDTH))
             cloud["y"] = random.randint(50, int(HEIGHT * 0.3))
+            cloud["bounce_timer"] = 0.22
+            cloud["bounce"] = 0.0
+            cloud["bounce_dir"] = 1.0
+            play_special_effect("cloud")
+            break
 
     try:
         import winsound
