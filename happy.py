@@ -335,38 +335,69 @@ def draw_background(frame_time):
     canvas.create_oval(moon_x - 60, moon_y - 60, moon_x + 60, moon_y + 60, fill="#040615", outline="")
     canvas.create_oval(moon_x - 100, moon_y - 100, moon_x + 100, moon_y + 100, outline="#fff2b2", width=2)
 
-    mist_x = WIDTH * 0.72 + math.sin(frame_time * 0.35) * 40
-    mist_y = HEIGHT * 0.22 + math.cos(frame_time * 0.28) * 24
-    canvas.create_oval(mist_x - 180, mist_y - 70, mist_x + 180, mist_y + 70, fill="#6fe7ff", outline="", stipple="gray25")
-    canvas.create_oval(mist_x - 140, mist_y - 40, mist_x + 140, mist_y + 40, fill="#ffffff", outline="", stipple="gray12")
-
     for i in range(4):
-        y_top = HEIGHT * 0.68 + i * 20 + math.sin(frame_time * 0.4 + i) * 8
-        y_bottom = HEIGHT * 0.86 + i * 12 + math.cos(frame_time * 0.35 + i) * 8
+        y_top = HEIGHT * 0.70 + i * 16 + math.sin(frame_time * 0.32 + i * 0.7) * 6
+        y_bottom = HEIGHT * 0.88 + i * 10 + math.cos(frame_time * 0.28 + i * 0.6) * 5
         color = "#071225"
         if i == 0:
-            color = "#0d1d34"
+            color = "#0e1f38"
         elif i == 1:
             color = "#132742"
         elif i == 2:
-            color = "#1a3351"
+            color = "#1b3555"
         else:
-            color = "#223f60"
+            color = "#244467"
         canvas.create_polygon(
             0, HEIGHT,
-            WIDTH * 0.08 + i * 110, y_top,
-            WIDTH * 0.28 + i * 90, HEIGHT * 0.74,
-            WIDTH * 0.52 + i * 60, y_bottom,
+            WIDTH * 0.06 + i * 95, y_top,
+            WIDTH * 0.24 + i * 80, HEIGHT * 0.76,
+            WIDTH * 0.48 + i * 55, y_bottom,
             WIDTH, HEIGHT,
             fill=color,
             outline=""
         )
 
+    canvas.create_rectangle(0, HEIGHT * 0.78, WIDTH, HEIGHT, fill="#08101f", outline="")
+
+    left_x = WIDTH * 0.06
+    left_y = HEIGHT * 0.82
+    canvas.create_polygon(
+        left_x, HEIGHT,
+        left_x + 40, HEIGHT * 0.76,
+        left_x + 75, HEIGHT * 0.72,
+        left_x + 110, HEIGHT * 0.78,
+        left_x + 95, HEIGHT,
+        fill="#0c2138", outline=""
+    )
+    canvas.create_line(left_x + 28, HEIGHT * 0.83, left_x + 28, HEIGHT, fill="#1f5d7a", width=4)
+    canvas.create_line(left_x + 52, HEIGHT * 0.79, left_x + 52, HEIGHT, fill="#1f5d7a", width=4)
+    canvas.create_line(left_x + 76, HEIGHT * 0.74, left_x + 76, HEIGHT, fill="#1f5d7a", width=4)
+
+    right_x = WIDTH * 0.94
+    right_y = HEIGHT * 0.82
+    canvas.create_polygon(
+        right_x, HEIGHT,
+        right_x - 40, HEIGHT * 0.76,
+        right_x - 75, HEIGHT * 0.72,
+        right_x - 110, HEIGHT * 0.78,
+        right_x - 95, HEIGHT,
+        fill="#0c2138", outline=""
+    )
+    canvas.create_line(right_x - 28, HEIGHT * 0.83, right_x - 28, HEIGHT, fill="#1f5d7a", width=4)
+    canvas.create_line(right_x - 52, HEIGHT * 0.79, right_x - 52, HEIGHT, fill="#1f5d7a", width=4)
+    canvas.create_line(right_x - 76, HEIGHT * 0.74, right_x - 76, HEIGHT, fill="#1f5d7a", width=4)
+
+    canvas.create_oval(WIDTH * 0.12, HEIGHT * 0.83, WIDTH * 0.16, HEIGHT * 0.87, fill="#f7e3a5", outline="")
+    canvas.create_oval(WIDTH * 0.84, HEIGHT * 0.83, WIDTH * 0.88, HEIGHT * 0.87, fill="#f7e3a5", outline="")
+
+    canvas.create_line(WIDTH * 0.12, HEIGHT * 0.85, WIDTH * 0.16, HEIGHT * 0.85, fill="#fff2b2", width=2)
+    canvas.create_line(WIDTH * 0.84, HEIGHT * 0.85, WIDTH * 0.88, HEIGHT * 0.85, fill="#fff2b2", width=2)
+
 
 def update_fireworks():
     global launch_timer
     launch_timer += 1
-    if launch_timer % 8 == 0:
+    if launch_timer % 16 == 0 and random.random() < 0.55:
         spawn_rocket()
 
     for rocket in rockets[:]:
@@ -541,7 +572,9 @@ def on_canvas_click(event):
     for cloud in clouds:
         cx = (cloud["x"] - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
         cy = (cloud["y"] - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
-        if abs(x - cx) < 70 and abs(y - cy) < 40:
+        cloud_w = 110 * cloud["size"]
+        cloud_h = 60 * cloud["size"]
+        if abs(x - (cx + cloud_w * 0.5)) < cloud_w * 0.42 and abs(y - (cy + cloud_h * 0.35)) < cloud_h * 0.33:
             spawn_click_burst(x, y, "cloud")
             cloud["x"] = random.randint(0, int(WIDTH))
             cloud["y"] = random.randint(50, int(HEIGHT * 0.3))
