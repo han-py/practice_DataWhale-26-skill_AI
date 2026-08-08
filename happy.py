@@ -321,22 +321,26 @@ def draw_background(frame_time):
     canvas.create_oval(moon_x - 60, moon_y - 60, moon_x + 60, moon_y + 60, fill="#040615", outline="")
     canvas.create_oval(moon_x - 100, moon_y - 100, moon_x + 100, moon_y + 100, outline="#fff2b2", width=2)
 
-    light_x = WIDTH * 0.18 + math.sin(frame_time * 0.5) * 40
-    light_y = HEIGHT * 0.24 + math.cos(frame_time * 0.4) * 30
-    glow_size = 180 + 25 * math.sin(frame_time * 0.8)
-    canvas.create_oval(light_x - glow_size, light_y - glow_size, light_x + glow_size, light_y + glow_size, fill="#8de9ff", outline="")
-    canvas.create_oval(light_x - glow_size * 0.7, light_y - glow_size * 0.7, light_x + glow_size * 0.7, light_y + glow_size * 0.7, outline="#ffffff", width=2)
-
     for i in range(4):
-        y_top = HEIGHT * 0.68 + i * 22 + math.sin(frame_time * 0.6 + i) * 16
-        y_bottom = HEIGHT * 0.86 + i * 14 + math.cos(frame_time * 0.5 + i) * 16
+        y_top = HEIGHT * 0.68 + i * 20 + math.sin(frame_time * 0.4 + i) * 8
+        y_bottom = HEIGHT * 0.86 + i * 12 + math.cos(frame_time * 0.35 + i) * 8
+        color = "#071225"
+        if i == 0:
+            color = "#0d1d34"
+        elif i == 1:
+            color = "#132742"
+        elif i == 2:
+            color = "#1a3351"
+        else:
+            color = "#223f60"
         canvas.create_polygon(
             0, HEIGHT,
-            WIDTH * 0.1 + i * 120, y_top,
-            WIDTH * 0.3 + i * 100, HEIGHT * 0.74,
-            WIDTH * 0.55 + i * 70, y_bottom,
+            WIDTH * 0.08 + i * 110, y_top,
+            WIDTH * 0.28 + i * 90, HEIGHT * 0.74,
+            WIDTH * 0.52 + i * 60, y_bottom,
             WIDTH, HEIGHT,
-            fill="#0a1b31", outline=""
+            fill=color,
+            outline=""
         )
 
 
@@ -460,11 +464,6 @@ def draw_title(frame_time):
     canvas.create_text(WIDTH / 2, sub_y, text="愿你笑容如花，心情如春", fill="#ffe6f2", font=("Microsoft YaHei", 30, "bold"))
     canvas.create_text(WIDTH / 2, sub_y + 58, text=subtitles[subtitle_index], fill="#9cf6ff", font=("Microsoft YaHei", 24, "bold"))
 
-    if progress > 0.2:
-        canvas.create_oval(
-            WIDTH * 0.18 - 180, HEIGHT * 0.22 - 140, WIDTH * 0.18 + 180, HEIGHT * 0.22 + 140,
-            fill="#ffffff", outline=""
-        )
 
 
 def animate():
