@@ -292,18 +292,19 @@ def draw_background(frame_time):
         canvas.create_oval(ox, oy, ox + size, oy + size, fill=color, outline="")
         canvas.create_oval(ox - 0.6, oy - 0.6, ox + size + 0.6, oy + size + 0.6, outline="#ffffff", width=1)
 
-    sun_x = WIDTH * 0.5 + math.sin(frame_time * 0.18) * 28
-    sun_y = HEIGHT * 0.22 + math.cos(frame_time * 0.14) * 16
-    canvas.create_oval(sun_x - 260, sun_y - 260, sun_x + 260, sun_y + 260, fill="#ffcf70", outline="")
-    canvas.create_oval(sun_x - 200, sun_y - 200, sun_x + 200, sun_y + 200, fill="#ffe3a9", outline="")
-    canvas.create_oval(sun_x - 120, sun_y - 120, sun_x + 120, sun_y + 120, fill="#fff8dc", outline="")
-    for i in range(16):
-        angle = math.radians(i * 22.5)
-        rx = sun_x + math.cos(angle) * 220
-        ry = sun_y + math.sin(angle) * 220
-        lx = sun_x + math.cos(angle) * 150
-        ly = sun_y + math.sin(angle) * 150
-        canvas.create_line(lx, ly, rx, ry, fill="#ffd98d", width=3, stipple="gray25")
+    sun_x = WIDTH * 0.5 + math.sin(frame_time * 0.18) * 24
+    sun_y = HEIGHT * 0.22 + math.cos(frame_time * 0.14) * 12
+    canvas.create_oval(sun_x - 220, sun_y - 220, sun_x + 220, sun_y + 220, fill="#ffe5a8", outline="")
+    canvas.create_oval(sun_x - 170, sun_y - 170, sun_x + 170, sun_y + 170, fill="#ffd18c", outline="")
+    canvas.create_oval(sun_x - 110, sun_y - 110, sun_x + 110, sun_y + 110, fill="#fff5c8", outline="")
+    for i in range(12):
+        angle = math.radians(i * 30)
+        rx = sun_x + math.cos(angle) * 180
+        ry = sun_y + math.sin(angle) * 180
+        lx = sun_x + math.cos(angle) * 120
+        ly = sun_y + math.sin(angle) * 120
+        canvas.create_line(lx, ly, rx, ry, fill="#ffd9a4", width=2, stipple="gray25")
+    canvas.create_oval(sun_x - 260, sun_y - 260, sun_x + 260, sun_y + 260, outline="#fff3cb", width=2)
 
     for cloud in clouds:
         cloud["x"] += cloud["speed"] * 0.55
@@ -333,7 +334,8 @@ def draw_background(frame_time):
         canvas.create_line(ox + 70 * scale, oy + 18 * scale, ox + 128 * scale, oy + 28 * scale, fill="#dceeff", width=2, stipple="gray25")
 
     glow_y = HEIGHT * 0.74
-    canvas.create_oval(0, glow_y - 140, WIDTH, glow_y + 180, fill="#f1b36a", outline="")
+    canvas.create_oval(0, glow_y - 140, WIDTH, glow_y + 180, fill="#f7c97b", outline="")
+    canvas.create_oval(0, glow_y - 100, WIDTH, glow_y + 140, fill="#f0b777", outline="")
     canvas.create_polygon(
         0, HEIGHT,
         WIDTH * 0.08, HEIGHT * 0.78,
@@ -342,7 +344,7 @@ def draw_background(frame_time):
         WIDTH * 0.66, HEIGHT * 0.70,
         WIDTH * 0.84, HEIGHT * 0.78,
         WIDTH, HEIGHT,
-        fill="#1b4056", outline=""
+        fill="#355663", outline=""
     )
     canvas.create_polygon(
         0, HEIGHT,
@@ -351,7 +353,7 @@ def draw_background(frame_time):
         WIDTH * 0.56, HEIGHT * 0.86,
         WIDTH * 0.76, HEIGHT * 0.80,
         WIDTH, HEIGHT,
-        fill="#234f67", outline=""
+        fill="#4d7185", outline=""
     )
     canvas.create_polygon(
         0, HEIGHT,
@@ -360,16 +362,16 @@ def draw_background(frame_time):
         WIDTH * 0.66, HEIGHT * 0.90,
         WIDTH * 0.86, HEIGHT * 0.86,
         WIDTH, HEIGHT,
-        fill="#2d6079", outline=""
+        fill="#6d93a5", outline=""
     )
 
     mist_band = HEIGHT * 0.86
-    canvas.create_rectangle(0, mist_band, WIDTH, HEIGHT, fill="#153548", outline="")
-    canvas.create_line(0, mist_band, WIDTH, mist_band, fill="#8be3ff", width=2, stipple="gray25")
+    canvas.create_rectangle(0, mist_band, WIDTH, HEIGHT, fill="#163645", outline="")
+    canvas.create_line(0, mist_band, WIDTH, mist_band, fill="#a6e7ff", width=2, stipple="gray25")
 
     for x in [WIDTH * 0.14, WIDTH * 0.22, WIDTH * 0.78, WIDTH * 0.86]:
-        canvas.create_oval(x - 8, HEIGHT * 0.84 - 10, x + 8, HEIGHT * 0.84 + 10, fill="#f7d36b", outline="")
-        canvas.create_line(x - 10, HEIGHT * 0.84, x + 10, HEIGHT * 0.84, fill="#fff0b8", width=2)
+        canvas.create_oval(x - 8, HEIGHT * 0.84 - 10, x + 8, HEIGHT * 0.84 + 10, fill="#f9e27e", outline="")
+        canvas.create_line(x - 10, HEIGHT * 0.84, x + 10, HEIGHT * 0.84, fill="#fff7b7", width=2)
 
     for piece in confetti:
         piece["y"] += piece["speed"] * 0.8
