@@ -32,6 +32,19 @@ flash_particles = []
 launch_timer = 0
 intro_time = 0.0
 music_started = False
+camera_x = 0.0
+camera_y = 0.0
+camera_zoom = 1.0
+scene_phase = 0
+subtitle_index = 0
+subtitle_timer = 0.0
+
+subtitles = [
+    "愿你今天也像星光一样明亮",
+    "愿你像烟花一样绽放出笑意",
+    "愿你的人生被好运和欢笑拥抱",
+    "愿你每一天都充满阳光和幸福",
+]
 
 
 def generate_music_file(path, duration_sec=24, sample_rate=22050):
@@ -160,22 +173,22 @@ def spawn_rocket():
         "tx": random.randint(80, WIDTH - 80),
         "ty": random.randint(80, HEIGHT // 2),
         "color": random.choice(COLORS),
-        "speed": random.uniform(8, 13),
+        "speed": random.uniform(9, 16),
         "trail": [],
     })
 
 
 def explode(rocket):
-    for _ in range(110):
+    for _ in range(140):
         angle = random.uniform(0, 2 * math.pi)
-        speed = random.uniform(2.0, 7.2)
+        speed = random.uniform(2.2, 8.5)
         particles.append({
             "x": rocket["tx"],
             "y": rocket["ty"],
             "vx": math.cos(angle) * speed,
             "vy": math.sin(angle) * speed,
-            "life": random.randint(40, 90),
-            "size": random.uniform(2.0, 5.0),
+            "life": random.randint(45, 100),
+            "size": random.uniform(2.2, 5.5),
             "color": rocket["color"],
         })
 
@@ -203,6 +216,8 @@ def spawn_click_burst(x, y):
 
 
 def draw_background(frame_time):
+    global camera_x, camera_y, camera_zoom
+
     canvas.create_rectangle(0, 0, WIDTH, HEIGHT, fill="#040615", outline="")
     for y in range(0, HEIGHT, 18):
         ratio = y / max(1, HEIGHT)
@@ -216,7 +231,9 @@ def draw_background(frame_time):
         twinkle = 0.65 + 0.35 * math.sin(frame_time * 1.3 + phase)
         glow = int(180 + twinkle * 70)
         color = f"#{glow:02x}{glow:02x}{glow:02x}"
-        canvas.create_oval(x, y, x + size, y + size, fill=color, outline="")
+        ox = (x - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
+        oy = (y - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
+        canvas.create_oval(ox, oy, ox + size, oy + size, fill=color, outline="")
 
     for cloud in clouds:
         cloud["x"] += cloud["speed"] * 0.6
@@ -226,9 +243,11 @@ def draw_background(frame_time):
         cx = cloud["x"]
         cy = cloud["y"]
         scale = cloud["size"]
-        canvas.create_oval(cx, cy, cx + 110 * scale, cy + 60 * scale, fill="#ffffff", outline="", stipple="gray50")
-        canvas.create_oval(cx + 32 * scale, cy - 6 * scale, cx + 128 * scale, cy + 46 * scale, fill="#ffffff", outline="", stipple="gray50")
-        canvas.create_oval(cx + 58 * scale, cy + 6 * scale, cx + 142 * scale, cy + 54 * scale, fill="#ffffff", outline="", stipple="gray50")
+        ox = (cx - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
+        oy = (cy - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
+        canvas.create_oval(ox, oy, ox + 110 * scale, oy + 60 * scale, fill="#ffffff", outline="", stipple="gray50")
+        canvas.create_oval(ox + 32 * scale, oy - 6 * scale, ox + 128 * scale, oy + 46 * scale, fill="#ffffff", outline="", stipple="gray50")
+        canvas.create_oval(ox + 58 * scale, oy + 6 * scale, ox + 142 * scale, oy + 54 * scale, fill="#ffffff", outline="", stipple="gray50")
 
     for aurora in auroras:
         aurora["x"] += 0.5
@@ -236,16 +255,12 @@ def draw_background(frame_time):
             aurora["x"] = -260
             aurora["y"] = random.randint(80, int(HEIGHT * 0.35))
         offset = math.sin(frame_time * 0.9 + aurora["phase"]) * 40
-        canvas.create_line(
-            aurora["x"], aurora["y"],
-            aurora["x"] + aurora["length"], aurora["y"] + offset,
-            fill=aurora["color"], width=8, stipple="gray25"
-        )
-        canvas.create_line(
-            aurora["x"] + 20, aurora["y"] + 12,
-            aurora["x"] + aurora["length"] + 20, aurora["y"] + offset + 26,
-            fill="#ffffff", width=3, stipple="gray12"
-        )
+        ox1 = (aurora["x"] - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
+        oy1 = (aurora["y"] - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
+        ox2 = ((aurora["x"] + aurora["length"]) - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
+        oy2 = ((aurora["y"] + offset) - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
+        canvas.create_line(ox1, oy1, ox2, oy2, fill=aurora["color"], width=8, stipple="gray25")
+        canvas.create_line(ox1 + 20, oy1 + 12, ox2 + 20, oy2 + 26, fill="#ffffff", width=3, stipple="gray12")
 
     for piece in confetti:
         piece["y"] += piece["speed"]
@@ -253,7 +268,9 @@ def draw_background(frame_time):
         if piece["y"] > HEIGHT + 20:
             piece["y"] = -20
             piece["x"] = random.randint(0, int(WIDTH))
-        canvas.create_text(piece["x"], piece["y"], text=piece["symbol"], fill=piece["color"], font=("Microsoft YaHei", int(piece["size"]), "bold"))
+        ox = (piece["x"] - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
+        oy = (piece["y"] - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
+        canvas.create_text(ox, oy, text=piece["symbol"], fill=piece["color"], font=("Microsoft YaHei", int(piece["size"]), "bold"))
 
     moon_x = WIDTH * 0.82 + math.sin(frame_time * 0.3) * 25
     moon_y = HEIGHT * 0.16 + math.cos(frame_time * 0.2) * 20
@@ -281,7 +298,7 @@ def draw_background(frame_time):
 def update_fireworks():
     global launch_timer
     launch_timer += 1
-    if launch_timer % 16 == 0:
+    if launch_timer % 8 == 0:
         spawn_rocket()
 
     for rocket in rockets[:]:
@@ -339,10 +356,26 @@ def update_fireworks():
 
 
 def draw_title(frame_time):
-    global intro_time
+    global intro_time, scene_phase, subtitle_index, subtitle_timer, camera_x, camera_y, camera_zoom
     intro_time += 0.016
     progress = min(1.0, intro_time / 2.8)
     ease = 3 * progress * progress - 2 * progress * progress * progress
+
+    if intro_time < 1.2:
+        camera_zoom = 1.0 + 0.03 * math.sin(intro_time * 4)
+    elif intro_time < 2.4:
+        camera_zoom = 1.04 + 0.06 * math.sin(intro_time * 3.2)
+        camera_x = math.sin(intro_time * 0.8) * 22
+        camera_y = math.cos(intro_time * 0.7) * 12
+    else:
+        camera_zoom = 1.08 + 0.02 * math.sin(intro_time * 2.2)
+        camera_x = math.sin(intro_time * 1.0) * 35
+        camera_y = math.cos(intro_time * 0.9) * 20
+
+    subtitle_timer += 0.016
+    if subtitle_timer > 2.2:
+        subtitle_timer = 0.0
+        subtitle_index = (subtitle_index + 1) % len(subtitles)
 
     y = HEIGHT * 0.72 + math.sin(frame_time * 1.8) * 10
     scale = 1.0 + 0.05 * math.sin(frame_time * 2.6)
@@ -353,7 +386,7 @@ def draw_title(frame_time):
 
     sub_y = y + 82
     canvas.create_text(WIDTH / 2, sub_y, text="愿你笑容如花，心情如春", fill="#ffe6f2", font=("Microsoft YaHei", 24, "bold"))
-    canvas.create_text(WIDTH / 2, sub_y + 42, text="点击屏幕，点亮更多祝福", fill="#9cf6ff", font=("Microsoft YaHei", 18, "bold"))
+    canvas.create_text(WIDTH / 2, sub_y + 42, text=subtitles[subtitle_index], fill="#9cf6ff", font=("Microsoft YaHei", 18, "bold"))
 
     if progress > 0.2:
         canvas.create_oval(
