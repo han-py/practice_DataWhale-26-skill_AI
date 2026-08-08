@@ -193,26 +193,49 @@ def explode(rocket):
         })
 
 
-def spawn_click_burst(x, y):
-    for _ in range(50):
+def spawn_click_burst(x, y, kind="burst"):
+    for _ in range(50 if kind == "burst" else 25):
         angle = random.uniform(0, 2 * math.pi)
-        speed = random.uniform(2.4, 7.8)
+        speed = random.uniform(2.4, 7.8) if kind == "burst" else random.uniform(1.2, 3.8)
         particles.append({
             "x": x,
             "y": y,
             "vx": math.cos(angle) * speed,
             "vy": math.sin(angle) * speed,
-            "life": random.randint(30, 75),
-            "size": random.uniform(2.0, 5.5),
+            "life": random.randint(30, 75) if kind == "burst" else random.randint(16, 36),
+            "size": random.uniform(2.0, 5.5) if kind == "burst" else random.uniform(1.2, 2.8),
             "color": random.choice(COLORS),
         })
         flash_particles.append({
             "x": x,
             "y": y,
-            "life": 12,
-            "size": random.uniform(3.0, 6.0),
+            "life": 12 if kind == "burst" else 8,
+            "size": random.uniform(3.0, 6.0) if kind == "burst" else random.uniform(1.8, 3.4),
             "color": random.choice(COLORS),
         })
+
+    if kind == "title":
+        for _ in range(20):
+            particles.append({
+                "x": x,
+                "y": y,
+                "vx": random.uniform(-3.0, 3.0),
+                "vy": random.uniform(-5.0, -1.0),
+                "life": random.randint(40, 70),
+                "size": random.uniform(2.2, 4.2),
+                "color": random.choice(COLORS),
+            })
+    elif kind == "star":
+        for _ in range(16):
+            particles.append({
+                "x": x,
+                "y": y,
+                "vx": math.cos(random.uniform(0, 2 * math.pi)) * random.uniform(0.8, 2.5),
+                "vy": math.sin(random.uniform(0, 2 * math.pi)) * random.uniform(0.8, 2.5),
+                "life": random.randint(20, 40),
+                "size": random.uniform(1.2, 2.8),
+                "color": "#fff7b2",
+            })
 
 
 def draw_background(frame_time):
@@ -414,10 +437,31 @@ def animate():
 
 
 def on_click(event):
-    spawn_click_burst(event.x, event.y)
+    spawn_click_burst(event.x, event.y, "burst")
     try:
         import winsound
         winsound.Beep(1700, 60)
+    except Exception:
+        pass
+
+
+def on_canvas_click(event):
+    x, y = event.x, event.y
+    if 0 <= x <= WIDTH and 0 <= y <= HEIGHT:
+        spawn_click_burst(x, y, "burst")
+        if abs(x - WIDTH * 0.18) < 180 and abs(y - HEIGHT * 0.22) < 140:
+            spawn_click_burst(x, y, "title")
+        if abs(y - (HEIGHT * 0.72 + math.sin(time.time() * 1.8) * 10)) < 70:
+            spawn_click_burst(x, y, "title")
+
+    if abs(x - WIDTH * 0.82) < 120 and abs(y - HEIGHT * 0.16) < 120:
+        spawn_click_burst(x, y, "star")
+    if abs(x - WIDTH * 0.18) < 160 and abs(y - HEIGHT * 0.24) < 140:
+        spawn_click_burst(x, y, "star")
+
+    try:
+        import winsound
+        winsound.Beep(1800, 50)
     except Exception:
         pass
 
@@ -435,7 +479,7 @@ def build_app():
     root.attributes("-topmost", True)
     root.attributes("-fullscreen", True)
     root.bind("<Escape>", lambda _: on_close())
-    root.bind("<Button-1>", on_click)
+    root.bind("<Button-1>", on_canvas_click)
     root.protocol("WM_DELETE_WINDOW", on_close)
 
     canvas = tk.Canvas(root, bg="#040615", highlightthickness=0)
