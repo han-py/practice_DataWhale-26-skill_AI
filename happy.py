@@ -276,6 +276,7 @@ def draw_background(frame_time):
         ox = (x - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
         oy = (y - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
         canvas.create_oval(ox, oy, ox + size, oy + size, fill=color, outline="")
+        canvas.create_oval(ox - 0.6, oy - 0.6, ox + size + 0.6, oy + size + 0.6, outline="#ffffff", width=1)
 
     for cloud in clouds:
         cloud["x"] += cloud["speed"] * 0.6
@@ -318,11 +319,13 @@ def draw_background(frame_time):
     moon_y = HEIGHT * 0.16 + math.cos(frame_time * 0.2) * 20
     canvas.create_oval(moon_x - 90, moon_y - 90, moon_x + 90, moon_y + 90, fill="#f7e3a5", outline="")
     canvas.create_oval(moon_x - 60, moon_y - 60, moon_x + 60, moon_y + 60, fill="#040615", outline="")
+    canvas.create_oval(moon_x - 100, moon_y - 100, moon_x + 100, moon_y + 100, outline="#fff2b2", width=2)
 
     light_x = WIDTH * 0.18 + math.sin(frame_time * 0.5) * 40
     light_y = HEIGHT * 0.24 + math.cos(frame_time * 0.4) * 30
     glow_size = 180 + 25 * math.sin(frame_time * 0.8)
     canvas.create_oval(light_x - glow_size, light_y - glow_size, light_x + glow_size, light_y + glow_size, fill="#8de9ff", outline="")
+    canvas.create_oval(light_x - glow_size * 0.7, light_y - glow_size * 0.7, light_x + glow_size * 0.7, light_y + glow_size * 0.7, outline="#ffffff", width=2)
 
     for i in range(4):
         y_top = HEIGHT * 0.68 + i * 22 + math.sin(frame_time * 0.6 + i) * 16
@@ -360,6 +363,7 @@ def update_fireworks():
         for px, py in rocket["trail"]:
             canvas.create_oval(px, py, px + 1.2, py + 1.2, fill=rocket["color"], outline="")
         canvas.create_oval(rocket["x"] - 3, rocket["y"] - 3, rocket["x"] + 3, rocket["y"] + 3, fill=rocket["color"], outline="")
+        canvas.create_oval(rocket["x"] - 5, rocket["y"] - 5, rocket["x"] + 5, rocket["y"] + 5, outline="#ffffff", width=1)
 
     for particle in particles[:]:
         particle["x"] += particle["vx"]
@@ -379,6 +383,14 @@ def update_fireworks():
             particle["y"] + particle["size"],
             fill=particle["color"],
             outline="",
+        )
+        canvas.create_oval(
+            particle["x"] - particle["size"] * 0.55,
+            particle["y"] - particle["size"] * 0.55,
+            particle["x"] + particle["size"] * 0.55,
+            particle["y"] + particle["size"] * 0.55,
+            outline="#ffffff",
+            width=1,
         )
 
     for flash in flash_particles[:]:
@@ -425,6 +437,7 @@ def draw_title(frame_time):
 
     canvas.create_text(WIDTH / 2 + 3, y + 5, text="天天开心", fill="#120d20", font=("Microsoft YaHei", size, "bold"))
     canvas.create_text(WIDTH / 2, y, text="天天开心", fill="#fff7b2", font=("Microsoft YaHei", size, "bold"))
+    canvas.create_text(WIDTH / 2, y, text="天天开心", fill="#ffffff", font=("Microsoft YaHei", size, "bold"), stipple="gray50")
 
     sub_y = y + 108
     canvas.create_text(WIDTH / 2, sub_y, text="愿你笑容如花，心情如春", fill="#ffe6f2", font=("Microsoft YaHei", 30, "bold"))
