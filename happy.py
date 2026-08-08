@@ -24,6 +24,8 @@ root = None
 canvas = None
 stars = []
 clouds = []
+auroras = []
+confetti = []
 rockets = []
 particles = []
 flash_particles = []
@@ -36,31 +38,33 @@ def generate_music_file(path, duration_sec=24, sample_rate=22050):
     if path.exists():
         return path
 
-    amplitude = 30000
+    amplitude = 32000
     frames = []
-    bpm = 96
+    bpm = 132
     beat_samples = int(sample_rate * 60 / bpm)
-    melody = [523.25, 659.25, 783.99, 659.25, 587.33, 523.25, 392.00, 440.00]
-    chords = [261.63, 329.63, 392.00]
-    note_len = beat_samples * 2
+    melody = [523.25, 659.25, 783.99, 659.25, 587.33, 523.25, 392.00, 440.00, 523.25, 587.33, 659.25, 698.46]
+    chords = [261.63, 329.63, 392.00, 440.00]
+    note_len = max(1, beat_samples // 2)
     total_samples = int(sample_rate * duration_sec)
     t = 0
+    note_idx = 0
 
     while t < total_samples:
-        note_idx = (t // note_len) % len(melody)
-        base = melody[note_idx]
+        base = melody[note_idx % len(melody)]
         chord = [base, base * 1.26, base * 1.5]
         for i in range(min(note_len, total_samples - t)):
             sample = 0.0
             for freq in chord:
-                sample += math.sin(2 * math.pi * freq * (t + i) / sample_rate) * 0.18
+                sample += math.sin(2 * math.pi * freq * (t + i) / sample_rate) * 0.16
             for freq in [chords[(note_idx // 2) % len(chords)], chords[(note_idx // 2 + 1) % len(chords)]]:
-                sample += math.sin(2 * math.pi * freq * (t + i) / sample_rate) * 0.08
-            envelope = min(1.0, max(0.0, 1.0 - (i / (note_len * 0.9))))
+                sample += math.sin(2 * math.pi * freq * (t + i) / sample_rate) * 0.07
+            sample += math.sin(2 * math.pi * 880 * (t + i) / sample_rate) * 0.025 * (1.0 if i % 14 == 0 else 0.0)
+            envelope = min(1.0, max(0.0, 1.0 - (i / (note_len * 0.92))))
             sample *= envelope
             sample = max(-1.0, min(1.0, sample))
             frames.append(int(sample * amplitude))
         t += note_len
+        note_idx += 1
 
     with wave.open(str(path), "wb") as wav:
         wav.setnchannels(1)
@@ -113,12 +117,39 @@ def create_stars(width, height):
 
 def create_clouds(width, height):
     clouds.clear()
-    for _ in range(10):
+    for _ in range(12):
         clouds.append({
             "x": random.randint(0, int(width)),
             "y": random.randint(60, int(height * 0.3)),
-            "size": random.uniform(0.9, 1.5),
-            "speed": random.uniform(0.15, 0.45),
+            "size": random.uniform(0.9, 1.6),
+            "speed": random.uniform(0.18, 0.5),
+        })
+
+
+def create_auroras(width, height):
+    auroras.clear()
+    for _ in range(6):
+        auroras.append({
+            "x": random.randint(-200, int(width + 200)),
+            "y": random.randint(80, int(height * 0.35)),
+            "length": random.randint(240, 420),
+            "color": random.choice(["#4cc9f0", "#7bdff6", "#ff7ad9", "#ffd166"]),
+            "phase": random.uniform(0, 6.28),
+        })
+
+
+def create_confetti(width, height):
+    confetti.clear()
+    symbols = ["✦", "✧", "✺", "❋", "•"]
+    for _ in range(120):
+        confetti.append({
+            "x": random.randint(0, int(width)),
+            "y": random.randint(-200, int(height)),
+            "size": random.uniform(12, 24),
+            "speed": random.uniform(0.7, 2.2),
+            "phase": random.uniform(0, 6.28),
+            "color": random.choice(COLORS),
+            "symbol": random.choice(symbols),
         })
 
 
@@ -198,6 +229,31 @@ def draw_background(frame_time):
         canvas.create_oval(cx, cy, cx + 110 * scale, cy + 60 * scale, fill="#ffffff", outline="", stipple="gray50")
         canvas.create_oval(cx + 32 * scale, cy - 6 * scale, cx + 128 * scale, cy + 46 * scale, fill="#ffffff", outline="", stipple="gray50")
         canvas.create_oval(cx + 58 * scale, cy + 6 * scale, cx + 142 * scale, cy + 54 * scale, fill="#ffffff", outline="", stipple="gray50")
+
+    for aurora in auroras:
+        aurora["x"] += 0.5
+        if aurora["x"] > WIDTH + 260:
+            aurora["x"] = -260
+            aurora["y"] = random.randint(80, int(HEIGHT * 0.35))
+        offset = math.sin(frame_time * 0.9 + aurora["phase"]) * 40
+        canvas.create_line(
+            aurora["x"], aurora["y"],
+            aurora["x"] + aurora["length"], aurora["y"] + offset,
+            fill=aurora["color"], width=8, stipple="gray25"
+        )
+        canvas.create_line(
+            aurora["x"] + 20, aurora["y"] + 12,
+            aurora["x"] + aurora["length"] + 20, aurora["y"] + offset + 26,
+            fill="#ffffff", width=3, stipple="gray12"
+        )
+
+    for piece in confetti:
+        piece["y"] += piece["speed"]
+        piece["x"] += math.sin(frame_time * 0.8 + piece["phase"]) * 0.4
+        if piece["y"] > HEIGHT + 20:
+            piece["y"] = -20
+            piece["x"] = random.randint(0, int(WIDTH))
+        canvas.create_text(piece["x"], piece["y"], text=piece["symbol"], fill=piece["color"], font=("Microsoft YaHei", int(piece["size"]), "bold"))
 
     moon_x = WIDTH * 0.82 + math.sin(frame_time * 0.3) * 25
     moon_y = HEIGHT * 0.16 + math.cos(frame_time * 0.2) * 20
@@ -305,15 +361,6 @@ def draw_title(frame_time):
             fill="#ffffff", outline=""
         )
 
-    if progress > 0.6:
-        canvas.create_text(
-            WIDTH / 2,
-            HEIGHT * 0.45,
-            text="电影感祝福",
-            fill="#ffd166",
-            font=("Microsoft YaHei", 24, "bold"),
-        )
-
 
 def animate():
     global WIDTH, HEIGHT
@@ -325,6 +372,8 @@ def animate():
         canvas.configure(width=WIDTH, height=HEIGHT)
         create_stars(WIDTH, HEIGHT)
         create_clouds(WIDTH, HEIGHT)
+        create_auroras(WIDTH, HEIGHT)
+        create_confetti(WIDTH, HEIGHT)
     draw_background(frame_time)
     update_fireworks()
     draw_title(frame_time)
@@ -365,6 +414,8 @@ def build_app():
     canvas.configure(width=WIDTH, height=HEIGHT)
     create_stars(WIDTH, HEIGHT)
     create_clouds(WIDTH, HEIGHT)
+    create_auroras(WIDTH, HEIGHT)
+    create_confetti(WIDTH, HEIGHT)
     play_music_file()
     animate()
     root.mainloop()
