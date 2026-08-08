@@ -263,19 +263,25 @@ def spawn_click_burst(x, y, kind="burst"):
 def draw_background(frame_time):
     global camera_x, camera_y, camera_zoom
 
+    def mix_color(color_a, color_b, t):
+        a = [int(color_a[i:i + 2], 16) for i in (1, 3, 5)]
+        b = [int(color_b[i:i + 2], 16) for i in (1, 3, 5)]
+        c = [int(a[i] + (b[i] - a[i]) * t) for i in range(3)]
+        return f"#{c[0]:02x}{c[1]:02x}{c[2]:02x}"
+
     canvas.create_rectangle(0, 0, WIDTH, HEIGHT, fill="#040615", outline="")
 
-    for y in range(0, HEIGHT, 18):
+    for y in range(0, HEIGHT + 1, 10):
         ratio = y / max(1, HEIGHT)
-        r = int(6 + 20 * ratio)
-        g = int(10 + 16 * ratio)
-        b = int(24 + 30 * ratio)
-        color = f"#{r:02x}{g:02x}{b:02x}"
-        canvas.create_rectangle(0, y, WIDTH, y + 18, fill=color, outline="")
-
-    canvas.create_rectangle(0, 0, WIDTH, HEIGHT * 0.58, fill="#07111f", outline="")
-    canvas.create_rectangle(0, HEIGHT * 0.58, WIDTH, HEIGHT * 0.78, fill="#0b1730", outline="")
-    canvas.create_rectangle(0, HEIGHT * 0.78, WIDTH, HEIGHT, fill="#0f223d", outline="")
+        if ratio < 0.38:
+            color = mix_color("#040615", "#142b4b", ratio / 0.38)
+        elif ratio < 0.7:
+            color = mix_color("#142b4b", "#7a6bb6", (ratio - 0.38) / 0.32)
+        elif ratio < 0.86:
+            color = mix_color("#7a6bb6", "#f2b56d", (ratio - 0.7) / 0.16)
+        else:
+            color = mix_color("#f2b56d", "#ffdca3", (ratio - 0.86) / 0.14)
+        canvas.create_rectangle(0, y, WIDTH, y + 10, fill=color, outline="")
 
     for x, y, size, alpha, phase in stars:
         twinkle = 0.65 + 0.35 * math.sin(frame_time * 1.3 + phase)
@@ -286,15 +292,28 @@ def draw_background(frame_time):
         canvas.create_oval(ox, oy, ox + size, oy + size, fill=color, outline="")
         canvas.create_oval(ox - 0.6, oy - 0.6, ox + size + 0.6, oy + size + 0.6, outline="#ffffff", width=1)
 
+    sun_x = WIDTH * 0.5 + math.sin(frame_time * 0.18) * 28
+    sun_y = HEIGHT * 0.22 + math.cos(frame_time * 0.14) * 16
+    canvas.create_oval(sun_x - 260, sun_y - 260, sun_x + 260, sun_y + 260, fill="#ffcf70", outline="")
+    canvas.create_oval(sun_x - 200, sun_y - 200, sun_x + 200, sun_y + 200, fill="#ffe3a9", outline="")
+    canvas.create_oval(sun_x - 120, sun_y - 120, sun_x + 120, sun_y + 120, fill="#fff8dc", outline="")
+    for i in range(16):
+        angle = math.radians(i * 22.5)
+        rx = sun_x + math.cos(angle) * 220
+        ry = sun_y + math.sin(angle) * 220
+        lx = sun_x + math.cos(angle) * 150
+        ly = sun_y + math.sin(angle) * 150
+        canvas.create_line(lx, ly, rx, ry, fill="#ffd98d", width=3, stipple="gray25")
+
     for cloud in clouds:
-        cloud["x"] += cloud["speed"] * 0.6
-        if cloud["x"] > WIDTH + 160:
-            cloud["x"] = -180
-            cloud["y"] = random.randint(50, int(HEIGHT * 0.3))
+        cloud["x"] += cloud["speed"] * 0.55
+        if cloud["x"] > WIDTH + 180:
+            cloud["x"] = -220
+            cloud["y"] = random.randint(50, int(HEIGHT * 0.32))
         if cloud["bounce_timer"] > 0:
             cloud["bounce_timer"] -= 0.016
-            cloud["bounce"] += cloud["bounce_dir"] * 3.5
-            if cloud["bounce"] > 8:
+            cloud["bounce"] += cloud["bounce_dir"] * 3.2
+            if cloud["bounce"] > 7:
                 cloud["bounce_dir"] = -1.0
             elif cloud["bounce"] < 0:
                 cloud["bounce"] = 0.0
@@ -307,97 +326,60 @@ def draw_background(frame_time):
         scale = cloud["size"]
         ox = (cx - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
         oy = (cy - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
-        canvas.create_oval(ox, oy, ox + 110 * scale, oy + 60 * scale, fill="#f8fbff", outline="", stipple="gray50")
-        canvas.create_oval(ox + 32 * scale, oy - 6 * scale, ox + 128 * scale, oy + 46 * scale, fill="#f8fbff", outline="", stipple="gray50")
-        canvas.create_oval(ox + 58 * scale, oy + 6 * scale, ox + 142 * scale, oy + 54 * scale, fill="#f8fbff", outline="", stipple="gray50")
-        canvas.create_line(ox + 24 * scale, oy + 30 * scale, ox + 86 * scale, oy + 14 * scale, fill="#dcecff", width=2, stipple="gray25")
-        canvas.create_line(ox + 70 * scale, oy + 18 * scale, ox + 128 * scale, oy + 28 * scale, fill="#dcecff", width=2, stipple="gray25")
+        canvas.create_oval(ox, oy, ox + 110 * scale, oy + 58 * scale, fill="#f7fbff", outline="", stipple="gray50")
+        canvas.create_oval(ox + 30 * scale, oy - 8 * scale, ox + 126 * scale, oy + 44 * scale, fill="#f7fbff", outline="", stipple="gray50")
+        canvas.create_oval(ox + 56 * scale, oy + 6 * scale, ox + 138 * scale, oy + 50 * scale, fill="#f7fbff", outline="", stipple="gray50")
+        canvas.create_line(ox + 24 * scale, oy + 28 * scale, ox + 82 * scale, oy + 18 * scale, fill="#dceeff", width=2, stipple="gray25")
+        canvas.create_line(ox + 70 * scale, oy + 18 * scale, ox + 128 * scale, oy + 28 * scale, fill="#dceeff", width=2, stipple="gray25")
 
-    for aurora in auroras:
-        aurora["x"] += 0.5
-        if aurora["x"] > WIDTH + 260:
-            aurora["x"] = -260
-            aurora["y"] = random.randint(80, int(HEIGHT * 0.35))
-        offset = math.sin(frame_time * 0.9 + aurora["phase"]) * 40
-        ox1 = (aurora["x"] - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
-        oy1 = (aurora["y"] - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
-        ox2 = ((aurora["x"] + aurora["length"]) - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
-        oy2 = ((aurora["y"] + offset) - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
-        canvas.create_line(ox1, oy1, ox2, oy2, fill=aurora["color"], width=8, stipple="gray25")
-        canvas.create_line(ox1 + 20, oy1 + 12, ox2 + 20, oy2 + 26, fill="#ffffff", width=3, stipple="gray12")
+    glow_y = HEIGHT * 0.74
+    canvas.create_oval(0, glow_y - 140, WIDTH, glow_y + 180, fill="#f1b36a", outline="")
+    canvas.create_polygon(
+        0, HEIGHT,
+        WIDTH * 0.08, HEIGHT * 0.78,
+        WIDTH * 0.24, HEIGHT * 0.74,
+        WIDTH * 0.44, HEIGHT * 0.82,
+        WIDTH * 0.66, HEIGHT * 0.70,
+        WIDTH * 0.84, HEIGHT * 0.78,
+        WIDTH, HEIGHT,
+        fill="#1b4056", outline=""
+    )
+    canvas.create_polygon(
+        0, HEIGHT,
+        WIDTH * 0.12, HEIGHT * 0.84,
+        WIDTH * 0.34, HEIGHT * 0.80,
+        WIDTH * 0.56, HEIGHT * 0.86,
+        WIDTH * 0.76, HEIGHT * 0.80,
+        WIDTH, HEIGHT,
+        fill="#234f67", outline=""
+    )
+    canvas.create_polygon(
+        0, HEIGHT,
+        WIDTH * 0.18, HEIGHT * 0.90,
+        WIDTH * 0.42, HEIGHT * 0.86,
+        WIDTH * 0.66, HEIGHT * 0.90,
+        WIDTH * 0.86, HEIGHT * 0.86,
+        WIDTH, HEIGHT,
+        fill="#2d6079", outline=""
+    )
+
+    mist_band = HEIGHT * 0.86
+    canvas.create_rectangle(0, mist_band, WIDTH, HEIGHT, fill="#153548", outline="")
+    canvas.create_line(0, mist_band, WIDTH, mist_band, fill="#8be3ff", width=2, stipple="gray25")
+
+    for x in [WIDTH * 0.14, WIDTH * 0.22, WIDTH * 0.78, WIDTH * 0.86]:
+        canvas.create_oval(x - 8, HEIGHT * 0.84 - 10, x + 8, HEIGHT * 0.84 + 10, fill="#f7d36b", outline="")
+        canvas.create_line(x - 10, HEIGHT * 0.84, x + 10, HEIGHT * 0.84, fill="#fff0b8", width=2)
 
     for piece in confetti:
-        piece["y"] += piece["speed"]
-        piece["x"] += math.sin(frame_time * 0.8 + piece["phase"]) * 0.4
+        piece["y"] += piece["speed"] * 0.8
+        piece["x"] += math.sin(frame_time * 0.8 + piece["phase"]) * 0.25
         if piece["y"] > HEIGHT + 20:
             piece["y"] = -20
             piece["x"] = random.randint(0, int(WIDTH))
         ox = (piece["x"] - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
         oy = (piece["y"] - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
-        canvas.create_text(ox, oy, text=piece["symbol"], fill=piece["color"], font=("Microsoft YaHei", int(piece["size"]), "bold"))
-
-    moon_x = WIDTH * 0.82 + math.sin(frame_time * 0.3) * 25
-    moon_y = HEIGHT * 0.16 + math.cos(frame_time * 0.2) * 20
-    canvas.create_oval(moon_x - 90, moon_y - 90, moon_x + 90, moon_y + 90, fill="#f7e3a5", outline="")
-    canvas.create_oval(moon_x - 60, moon_y - 60, moon_x + 60, moon_y + 60, fill="#040615", outline="")
-    canvas.create_oval(moon_x - 100, moon_y - 100, moon_x + 100, moon_y + 100, outline="#fff2b2", width=2)
-
-    for i in range(4):
-        y_top = HEIGHT * 0.70 + i * 16 + math.sin(frame_time * 0.32 + i * 0.7) * 6
-        y_bottom = HEIGHT * 0.88 + i * 10 + math.cos(frame_time * 0.28 + i * 0.6) * 5
-        color = "#071225"
-        if i == 0:
-            color = "#0e1f38"
-        elif i == 1:
-            color = "#132742"
-        elif i == 2:
-            color = "#1b3555"
-        else:
-            color = "#244467"
-        canvas.create_polygon(
-            0, HEIGHT,
-            WIDTH * 0.06 + i * 95, y_top,
-            WIDTH * 0.24 + i * 80, HEIGHT * 0.76,
-            WIDTH * 0.48 + i * 55, y_bottom,
-            WIDTH, HEIGHT,
-            fill=color,
-            outline=""
-        )
-
-    canvas.create_rectangle(0, HEIGHT * 0.78, WIDTH, HEIGHT, fill="#08101f", outline="")
-
-    left_x = WIDTH * 0.06
-    canvas.create_polygon(
-        left_x, HEIGHT,
-        left_x + 30, HEIGHT * 0.78,
-        left_x + 68, HEIGHT * 0.72,
-        left_x + 102, HEIGHT * 0.76,
-        left_x + 88, HEIGHT,
-        fill="#0b2138", outline=""
-    )
-    canvas.create_line(left_x + 24, HEIGHT * 0.82, left_x + 24, HEIGHT, fill="#1d5c77", width=4)
-    canvas.create_line(left_x + 46, HEIGHT * 0.77, left_x + 46, HEIGHT, fill="#1d5c77", width=4)
-    canvas.create_line(left_x + 70, HEIGHT * 0.73, left_x + 70, HEIGHT, fill="#1d5c77", width=4)
-    canvas.create_oval(left_x + 18, HEIGHT * 0.78, left_x + 40, HEIGHT * 0.83, fill="#f7e3a5", outline="")
-    canvas.create_line(left_x + 20, HEIGHT * 0.80, left_x + 38, HEIGHT * 0.80, fill="#fff2b2", width=2)
-
-    right_x = WIDTH * 0.94
-    canvas.create_polygon(
-        right_x, HEIGHT,
-        right_x - 30, HEIGHT * 0.78,
-        right_x - 68, HEIGHT * 0.72,
-        right_x - 102, HEIGHT * 0.76,
-        right_x - 88, HEIGHT,
-        fill="#0b2138", outline=""
-    )
-    canvas.create_line(right_x - 24, HEIGHT * 0.82, right_x - 24, HEIGHT, fill="#1d5c77", width=4)
-    canvas.create_line(right_x - 46, HEIGHT * 0.77, right_x - 46, HEIGHT, fill="#1d5c77", width=4)
-    canvas.create_line(right_x - 70, HEIGHT * 0.73, right_x - 70, HEIGHT, fill="#1d5c77", width=4)
-    canvas.create_oval(right_x - 40, HEIGHT * 0.78, right_x - 18, HEIGHT * 0.83, fill="#f7e3a5", outline="")
-    canvas.create_line(right_x - 38, HEIGHT * 0.80, right_x - 20, HEIGHT * 0.80, fill="#fff2b2", width=2)
-
-    canvas.create_line(WIDTH * 0.22, HEIGHT * 0.82, WIDTH * 0.30, HEIGHT * 0.74, fill="#8dd5ff", width=3, stipple="gray25")
-    canvas.create_line(WIDTH * 0.78, HEIGHT * 0.82, WIDTH * 0.70, HEIGHT * 0.74, fill="#8dd5ff", width=3, stipple="gray25")
+        canvas.create_text(ox, oy, text=piece["symbol"], fill=piece["color"], font=("Microsoft YaHei", int(piece["size"] * 0.8), "bold"))
 
 
 def update_fireworks():
