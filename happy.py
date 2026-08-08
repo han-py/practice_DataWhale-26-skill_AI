@@ -194,47 +194,66 @@ def explode(rocket):
 
 
 def spawn_click_burst(x, y, kind="burst"):
-    for _ in range(50 if kind == "burst" else 25):
-        angle = random.uniform(0, 2 * math.pi)
-        speed = random.uniform(2.4, 7.8) if kind == "burst" else random.uniform(1.2, 3.8)
-        particles.append({
-            "x": x,
-            "y": y,
-            "vx": math.cos(angle) * speed,
-            "vy": math.sin(angle) * speed,
-            "life": random.randint(30, 75) if kind == "burst" else random.randint(16, 36),
-            "size": random.uniform(2.0, 5.5) if kind == "burst" else random.uniform(1.2, 2.8),
-            "color": random.choice(COLORS),
-        })
-        flash_particles.append({
-            "x": x,
-            "y": y,
-            "life": 12 if kind == "burst" else 8,
-            "size": random.uniform(3.0, 6.0) if kind == "burst" else random.uniform(1.8, 3.4),
-            "color": random.choice(COLORS),
-        })
-
-    if kind == "title":
-        for _ in range(20):
+    if kind == "cloud":
+        for _ in range(35):
+            particles.append({
+                "x": x,
+                "y": y,
+                "vx": random.uniform(-2.2, 2.2),
+                "vy": random.uniform(-1.5, 1.5),
+                "life": random.randint(20, 45),
+                "size": random.uniform(1.6, 3.2),
+                "color": "#e6f7ff",
+            })
+    elif kind == "star":
+        for _ in range(24):
+            particles.append({
+                "x": x,
+                "y": y,
+                "vx": math.cos(random.uniform(0, 2 * math.pi)) * random.uniform(0.8, 2.8),
+                "vy": math.sin(random.uniform(0, 2 * math.pi)) * random.uniform(0.8, 2.8),
+                "life": random.randint(20, 40),
+                "size": random.uniform(1.4, 3.0),
+                "color": "#fff7b2",
+            })
+    elif kind == "title":
+        for _ in range(28):
             particles.append({
                 "x": x,
                 "y": y,
                 "vx": random.uniform(-3.0, 3.0),
                 "vy": random.uniform(-5.0, -1.0),
                 "life": random.randint(40, 70),
-                "size": random.uniform(2.2, 4.2),
+                "size": random.uniform(2.2, 4.4),
                 "color": random.choice(COLORS),
             })
-    elif kind == "star":
-        for _ in range(16):
+        for _ in range(15):
+            flash_particles.append({
+                "x": x,
+                "y": y,
+                "life": 14,
+                "size": random.uniform(5.0, 8.0),
+                "color": random.choice(COLORS),
+            })
+    else:
+        for _ in range(50):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2.4, 7.8)
             particles.append({
                 "x": x,
                 "y": y,
-                "vx": math.cos(random.uniform(0, 2 * math.pi)) * random.uniform(0.8, 2.5),
-                "vy": math.sin(random.uniform(0, 2 * math.pi)) * random.uniform(0.8, 2.5),
-                "life": random.randint(20, 40),
-                "size": random.uniform(1.2, 2.8),
-                "color": "#fff7b2",
+                "vx": math.cos(angle) * speed,
+                "vy": math.sin(angle) * speed,
+                "life": random.randint(30, 75),
+                "size": random.uniform(2.0, 5.5),
+                "color": random.choice(COLORS),
+            })
+            flash_particles.append({
+                "x": x,
+                "y": y,
+                "life": 12,
+                "size": random.uniform(3.0, 6.0),
+                "color": random.choice(COLORS),
             })
 
 
@@ -402,14 +421,14 @@ def draw_title(frame_time):
 
     y = HEIGHT * 0.72 + math.sin(frame_time * 1.8) * 10
     scale = 1.0 + 0.05 * math.sin(frame_time * 2.6)
-    size = int(74 + 14 * scale + 24 * ease)
+    size = int(96 + 20 * scale + 30 * ease)
 
-    canvas.create_text(WIDTH / 2 + 2, y + 4, text="天天开心", fill="#120d20", font=("Microsoft YaHei", size, "bold"))
+    canvas.create_text(WIDTH / 2 + 3, y + 5, text="天天开心", fill="#120d20", font=("Microsoft YaHei", size, "bold"))
     canvas.create_text(WIDTH / 2, y, text="天天开心", fill="#fff7b2", font=("Microsoft YaHei", size, "bold"))
 
-    sub_y = y + 82
-    canvas.create_text(WIDTH / 2, sub_y, text="愿你笑容如花，心情如春", fill="#ffe6f2", font=("Microsoft YaHei", 24, "bold"))
-    canvas.create_text(WIDTH / 2, sub_y + 42, text=subtitles[subtitle_index], fill="#9cf6ff", font=("Microsoft YaHei", 18, "bold"))
+    sub_y = y + 108
+    canvas.create_text(WIDTH / 2, sub_y, text="愿你笑容如花，心情如春", fill="#ffe6f2", font=("Microsoft YaHei", 30, "bold"))
+    canvas.create_text(WIDTH / 2, sub_y + 58, text=subtitles[subtitle_index], fill="#9cf6ff", font=("Microsoft YaHei", 24, "bold"))
 
     if progress > 0.2:
         canvas.create_oval(
@@ -458,6 +477,14 @@ def on_canvas_click(event):
         spawn_click_burst(x, y, "star")
     if abs(x - WIDTH * 0.18) < 160 and abs(y - HEIGHT * 0.24) < 140:
         spawn_click_burst(x, y, "star")
+
+    for cloud in clouds:
+        cx = (cloud["x"] - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
+        cy = (cloud["y"] - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
+        if abs(x - cx) < 70 and abs(y - cy) < 40:
+            spawn_click_burst(x, y, "cloud")
+            cloud["x"] = random.randint(0, int(WIDTH))
+            cloud["y"] = random.randint(50, int(HEIGHT * 0.3))
 
     try:
         import winsound
