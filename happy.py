@@ -435,9 +435,26 @@ def draw_title(frame_time):
     scale = 1.0 + 0.05 * math.sin(frame_time * 2.6)
     size = int(96 + 20 * scale + 30 * ease)
 
+    halo_r = max(140, int(size * 0.72))
+    canvas.create_oval(
+        WIDTH / 2 - halo_r * 1.16,
+        y - halo_r * 1.10,
+        WIDTH / 2 + halo_r * 1.16,
+        y + halo_r * 1.10,
+        outline="#ffe6f2",
+        width=2,
+    )
+    canvas.create_oval(
+        WIDTH / 2 - halo_r * 1.02,
+        y - halo_r * 0.98,
+        WIDTH / 2 + halo_r * 1.02,
+        y + halo_r * 0.98,
+        outline="#fff7b2",
+        width=1,
+    )
+
     canvas.create_text(WIDTH / 2 + 3, y + 5, text="天天开心", fill="#120d20", font=("Microsoft YaHei", size, "bold"))
     canvas.create_text(WIDTH / 2, y, text="天天开心", fill="#fff7b2", font=("Microsoft YaHei", size, "bold"))
-    canvas.create_text(WIDTH / 2, y, text="天天开心", fill="#ffffff", font=("Microsoft YaHei", size, "bold"), stipple="gray50")
 
     sub_y = y + 108
     canvas.create_text(WIDTH / 2, sub_y, text="愿你笑容如花，心情如春", fill="#ffe6f2", font=("Microsoft YaHei", 30, "bold"))
