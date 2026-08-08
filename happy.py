@@ -29,6 +29,7 @@ confetti = []
 rockets = []
 particles = []
 flash_particles = []
+interactive_props = []
 launch_timer = 0
 intro_time = 0.0
 music_started = False
@@ -166,6 +167,23 @@ def create_confetti(width, height):
             "phase": random.uniform(0, 6.28),
             "color": random.choice(COLORS),
             "symbol": random.choice(symbols),
+        })
+
+
+def create_interactive_props(width, height):
+    interactive_props.clear()
+    for i in range(8):
+        x = width * (0.16 + i * 0.1 + random.uniform(-0.02, 0.02))
+        y = height * (0.84 + random.uniform(-0.01, 0.02))
+        kind = random.choice(["flower", "star", "balloon", "lantern"])
+        interactive_props.append({
+            "x": x,
+            "y": y,
+            "kind": kind,
+            "scale": random.uniform(0.8, 1.2),
+            "phase": random.uniform(0, 6.28),
+            "pulse": random.uniform(0.0, 1.0),
+            "bounce": random.uniform(0, 6.28),
         })
 
 
@@ -369,9 +387,32 @@ def draw_background(frame_time):
     canvas.create_rectangle(0, mist_band, WIDTH, HEIGHT, fill="#163645", outline="")
     canvas.create_line(0, mist_band, WIDTH, mist_band, fill="#a6e7ff", width=2, stipple="gray25")
 
-    for x in [WIDTH * 0.14, WIDTH * 0.22, WIDTH * 0.78, WIDTH * 0.86]:
-        canvas.create_oval(x - 8, HEIGHT * 0.84 - 10, x + 8, HEIGHT * 0.84 + 10, fill="#f9e27e", outline="")
-        canvas.create_line(x - 10, HEIGHT * 0.84, x + 10, HEIGHT * 0.84, fill="#fff7b7", width=2)
+    for prop in interactive_props:
+        sway = math.sin(frame_time * 1.1 + prop["phase"]) * 4
+        bob = math.sin(frame_time * 1.7 + prop["bounce"]) * 3
+        x = prop["x"] + sway
+        y = prop["y"] + bob
+        scale = prop["scale"]
+        prop["draw_x"] = x
+        prop["draw_y"] = y
+        if prop["kind"] == "flower":
+            canvas.create_oval(x - 8 * scale, y - 8 * scale, x + 8 * scale, y + 8 * scale, fill="#ff7aa2", outline="")
+            canvas.create_oval(x - 5 * scale, y - 10 * scale, x + 5 * scale, y - 2 * scale, fill="#ffb6c1", outline="")
+            canvas.create_oval(x - 10 * scale, y - 5 * scale, x - 2 * scale, y + 5 * scale, fill="#ffb6c1", outline="")
+            canvas.create_oval(x + 2 * scale, y - 5 * scale, x + 10 * scale, y + 5 * scale, fill="#ffb6c1", outline="")
+            canvas.create_oval(x - 5 * scale, y + 2 * scale, x + 5 * scale, y + 10 * scale, fill="#ffb6c1", outline="")
+            canvas.create_line(x, y - 14 * scale, x, y - 24 * scale, fill="#69c17b", width=2)
+        elif prop["kind"] == "star":
+            canvas.create_text(x, y, text="✦", fill="#ffd166", font=("Microsoft YaHei", int(20 * scale), "bold"))
+            canvas.create_text(x, y, text="✧", fill="#fff7b2", font=("Microsoft YaHei", int(12 * scale), "bold"))
+        elif prop["kind"] == "balloon":
+            canvas.create_oval(x - 10 * scale, y - 16 * scale, x + 10 * scale, y + 8 * scale, fill="#ff6b6b", outline="")
+            canvas.create_line(x, y + 8 * scale, x, y + 26 * scale, fill="#ff9f1c", width=2)
+            canvas.create_line(x, y + 26 * scale, x - 6, y + 34 * scale, fill="#ff9f1c", width=2)
+        else:
+            canvas.create_oval(x - 10 * scale, y - 16 * scale, x + 10 * scale, y + 6 * scale, fill="#4cc9f0", outline="")
+            canvas.create_line(x, y + 6 * scale, x, y + 24 * scale, fill="#7bdff6", width=2)
+            canvas.create_line(x - 4, y + 18 * scale, x + 4, y + 18 * scale, fill="#ffffff", width=2)
 
     for piece in confetti:
         piece["y"] += piece["speed"] * 0.8
@@ -559,6 +600,17 @@ def on_canvas_click(event):
     if abs(x - WIDTH * 0.18) < 160 and abs(y - HEIGHT * 0.24) < 140:
         spawn_click_burst(x, y, "star")
 
+    for prop in interactive_props:
+        if "draw_x" in prop and "draw_y" in prop:
+            dx = x - prop["draw_x"]
+            dy = y - prop["draw_y"]
+            if abs(dx) < 24 and abs(dy) < 24:
+                spawn_click_burst(x, y, "star")
+                prop["phase"] += 0.8
+                prop["bounce"] += 0.6
+                play_special_effect("cloud")
+                break
+
     for cloud in clouds:
         cx = (cloud["x"] - WIDTH / 2) * camera_zoom + WIDTH / 2 + camera_x
         cy = (cloud["y"] - HEIGHT / 2) * camera_zoom + HEIGHT / 2 + camera_y
@@ -608,6 +660,7 @@ def build_app():
     create_clouds(WIDTH, HEIGHT)
     create_auroras(WIDTH, HEIGHT)
     create_confetti(WIDTH, HEIGHT)
+    create_interactive_props(WIDTH, HEIGHT)
     play_music_file()
     animate()
     root.mainloop()
